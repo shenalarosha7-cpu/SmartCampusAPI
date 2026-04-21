@@ -21,6 +21,7 @@ public class SmartCampusApplication extends Application {
         Set<Class<?>> classes = new HashSet<>();
         // Tell Tomcat to load our Discovery endpoint!
         classes.add(DiscoveryResource.class);
+        classes.add(RoomResource.class);
         return classes;
     }
 }
