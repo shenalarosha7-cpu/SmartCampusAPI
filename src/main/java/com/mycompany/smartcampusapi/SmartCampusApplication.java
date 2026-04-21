@@ -22,6 +22,7 @@ public class SmartCampusApplication extends Application {
         // Tell Tomcat to load our Discovery endpoint!
         classes.add(DiscoveryResource.class);
         classes.add(RoomResource.class);
+        classes.add(SensorResource.class);
         return classes;
     }
 }
