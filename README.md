@@ -54,3 +54,23 @@ curl -X POST http://localhost:8080/SmartCampusAPI/api/v1/rooms -H "Content-Type:
 (Note: A room cannot be deleted if sensors are still attached to it)
 
 curl -X DELETE http://localhost:8080/SmartCampusAPI/api/v1/rooms/CS-101 -v
+
+**5. Retrieve a list of all sensors:**
+
+curl -X GET http://localhost:8080/SmartCampusAPI/api/v1/sensors
+
+**6. Retrieve a specific sensor by its ID:**
+
+curl -X GET http://localhost:8080/SmartCampusAPI/api/v1/sensors/SENS-01
+
+**7. Filter sensors by type (e.g., CO2):**
+
+curl -X GET "http://localhost:8080/SmartCampusAPI/api/v1/sensors?type=CO2"
+
+**8. Create a new sensor and link it to a room (POST):**
+
+curl -X POST http://localhost:8080/SmartCampusAPI/api/v1/sensors -H "Content-Type: application/json" -d "{\"id\":\"SENS-03\", \"type\":\"Temperature\", \"value\":22.5, \"roomId\":\"LIB-301\"}"
+
+**9. Delete a sensor:**
+
+curl -X DELETE http://localhost:8080/SmartCampusAPI/api/v1/sensors/SENS-02 -v
