@@ -101,4 +101,11 @@ public class SensorResource {
         sensors.remove(sensorId);
         return Response.status(Response.Status.NO_CONTENT).build();
     }
+    
+    // 5. SUB-RESOURCE LOCATOR for Readings
+    @Path("/{sensorId}/readings")
+    public SensorReadingResource getReadingsResource(@PathParam("sensorId") String sensorId) {
+        // We pass the sensorId to the new class so it knows which sensor to work with
+        return new SensorReadingResource(sensorId);
+    }
 }

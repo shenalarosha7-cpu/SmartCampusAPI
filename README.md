@@ -32,45 +32,33 @@ This benefits client developers by reducing coupling between the client and the 
 
 ---
 
-## Part 2 & 3: API Testing Commands
+### Part 2: Question 1 (IDs vs. Full Objects)
+**When returning a list of rooms, what are the implications of returning only IDs versus returning the full room objects? Consider network bandwidth and client side processing.**
 
-The following `curl` commands can be used to test the features of the Smart Campus API via the Command Prompt. Ensure the Tomcat server is running before executing these.
+**Answer:** Returning only IDs significantly reduces the payload size, which saves network bandwidth and speeds up the initial API response. However, it introduces the "N+1 problem" for the client—if the client needs to display the room names or capacities, it must make subsequent HTTP requests for every single ID. Returning the full room objects consumes more initial bandwidth, but it vastly improves client-side performance by providing all necessary data in a single request, eliminating the latency of multiple round trips.
 
-### Room Management Commands
+### Part 2: Question 2 (DELETE Idempotency)
+**Is the DELETE operation idempotent in your implementation? Provide a detailed justification by describing what happens if a client mistakenly sends the exact same DELETE request for a room multiple times.**
 
-**1. Retrieve a list of all rooms:**
-```bash
-curl -X GET http://localhost:8080/SmartCampusAPI/api/v1/rooms
+**Answer:** Yes, the DELETE operation is idempotent. In REST, an operation is idempotent if making multiple identical requests has the same effect on the server's state as making a single request. In our implementation, the first DELETE request successfully removes the room and returns a `204 No Content`. If the client sends the exact same request again, the room is already gone, so our code returns a `404 Not Found`. While the HTTP status code changes, the *state of the server* remains exactly the same (the room remains deleted), fulfilling the definition of idempotency.
 
-**2. Retrieve a specific room by its ID:**
+---
 
-curl -X GET http://localhost:8080/SmartCampusAPI/api/v1/rooms/LIB-301
+### Part 3: Question 1 (@Consumes Mismatch)
+**Explain the technical consequences if a client attempts to send data in a different format, such as text/plain or application/xml. How does JAX-RS handle this mismatch?**
 
-**3. Create a new room (POST):**
+**Answer:** By using the `@Consumes(MediaType.APPLICATION_JSON)` annotation, we are explicitly telling the server to only accept JSON payloads. If a client attempts to send `text/plain` or `application/xml`, the JAX-RS runtime will intercept the request before it even reaches our Java method. It checks the `Content-Type` header of the incoming request, notices the mismatch, and automatically rejects the request, returning a standard `HTTP 415 Unsupported Media Type` error to the client.
 
-curl -X POST http://localhost:8080/SmartCampusAPI/api/v1/rooms -H "Content-Type: application/json" -d "{\"id\":\"LEC-01\", \"name\":\"Main Lecture Hall\", \"capacity\":100}"
+### Part 3: Question 2 (QueryParam vs PathParam)
+**Contrast filtering using @QueryParam with an alternative design where the type is part of the URL path (e.g., /api/v1/sensors/type/CO2). Why is the query parameter approach generally considered superior for filtering?**
 
-**4. Delete a room:**
-(Note: A room cannot be deleted if sensors are still attached to it)
+**Answer:** In REST API design, path parameters are meant to identify specific, unique resources or hierarchical structures (e.g., a specific room or sensor). Query parameters are meant to apply optional filters, sorting, or pagination to a collection. Using the path parameter approach (`/type/CO2`) creates rigid, inflexible routing. If we later wanted to filter by type *and* status, the URL structure would become highly convoluted. Query parameters allow clients to dynamically combine multiple optional filters (e.g., `?type=CO2&status=ACTIVE`) cleanly and intuitively.
 
-curl -X DELETE http://localhost:8080/SmartCampusAPI/api/v1/rooms/CS-101 -v
+## Part 4: Deep Nesting with Sub-Resources
 
-**5. Retrieve a list of all sensors:**
+### Question 1: Sub-Resource Locator Pattern
+**Discuss the architectural benefits of the Sub-Resource Locator pattern. How does delegating logic to separate classes help manage complexity in large APIs compared to defining every nested path (e.g., sensors/{id}/readings/{rid}) in one massive controller class?**
 
-curl -X GET http://localhost:8080/SmartCampusAPI/api/v1/sensors
+**Answer:** The Sub-Resource Locator pattern is essential for maintaining the Single Responsibility Principle within an API. By delegating the logic for `/readings` to a dedicated `SensorReadingResource` class, we prevent the parent `SensorResource` class from becoming a massive, unmanageable "god class." 
 
-**6. Retrieve a specific sensor by its ID:**
-
-curl -X GET http://localhost:8080/SmartCampusAPI/api/v1/sensors/SENS-01
-
-**7. Filter sensors by type (e.g., CO2):**
-
-curl -X GET "http://localhost:8080/SmartCampusAPI/api/v1/sensors?type=CO2"
-
-**8. Create a new sensor and link it to a room (POST):**
-
-curl -X POST http://localhost:8080/SmartCampusAPI/api/v1/sensors -H "Content-Type: application/json" -d "{\"id\":\"SENS-03\", \"type\":\"Temperature\", \"value\":22.5, \"roomId\":\"LIB-301\"}"
-
-**9. Delete a sensor:**
-
-curl -X DELETE http://localhost:8080/SmartCampusAPI/api/v1/sensors/SENS-02 -v
+This separation of concerns makes the codebase significantly easier to read, test, and maintain. If the API grows to include further nesting (e.g., `/sensors/{id}/readings/{rid}/calibrations`), the locator pattern allows us to cleanly chain these distinct resources together. It also encapsulates the business logic specific to readings entirely within its own context, rather than cluttering the sensor management logic.
