@@ -19,10 +19,22 @@ public class SmartCampusApplication extends Application {
     @Override
     public Set<Class<?>> getClasses() {
         Set<Class<?>> classes = new HashSet<>();
-        // Tell Tomcat to load our Discovery endpoint!
+        
+        // Resources
         classes.add(DiscoveryResource.class);
         classes.add(RoomResource.class);
         classes.add(SensorResource.class);
+
+        // Exception Mappers
+        classes.add(ResourceNotFoundMapper.class);       
+        classes.add(RoomNotEmptyExceptionMapper.class);  
+        classes.add(LinkedResourceNotFoundMapper.class); 
+        classes.add(SensorUnavailableMapper.class);      
+        classes.add(GlobalExceptionMapper.class);   
+
+        // Filter
+        classes.add(LoggingFilter.class);
+        
         return classes;
     }
 }

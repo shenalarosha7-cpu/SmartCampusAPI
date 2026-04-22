@@ -21,64 +21,51 @@ import javax.ws.rs.core.Response;
 @Consumes(MediaType.APPLICATION_JSON)
 public class RoomResource {
     
-    // Connect to our mock database
     private Map<String, Room> rooms = DatabaseClass.getRooms();
 
-    // 1. GET ALL ROOMS
     @GET
     public List<Room> getAllRooms() {
         return new ArrayList<>(rooms.values());
     }
 
-    // 2. GET A SPECIFIC ROOM BY ID
     @GET
     @Path("/{roomId}")
     public Response getRoom(@PathParam("roomId") String roomId) {
         Room room = rooms.get(roomId);
         if (room == null) {
-            return Response.status(Response.Status.NOT_FOUND)
-                           .entity("Room not found")
-                           .build();
+            // Uses ResourceNotFoundMapper (404)
+            throw new LinkedResourceNotFoundException("Room with ID " + roomId + " not found.");
         }
         return Response.ok(room).build();
     }
 
-    // 3. CREATE A NEW ROOM
     @POST
     public Response addRoom(Room room) {
-        // Prevent overwriting an existing room
         if (rooms.containsKey(room.getId())) {
-            return Response.status(Response.Status.CONFLICT)
-                           .entity("Room ID already exists")
-                           .build();
+            // NEW: Use the RoomNotEmptyException for "Conflict" (409)
+            throw new RoomNotEmptyException("Room ID " + room.getId() + " already exists.");
         }
         rooms.put(room.getId(), room);
         return Response.status(Response.Status.CREATED).entity(room).build();
     }
     
-    // 4. DELETE A ROOM
     @DELETE
     @Path("/{roomId}")
     public Response deleteRoom(@PathParam("roomId") String roomId) {
         Room room = rooms.get(roomId);
         
-        // Check if the room actually exists
         if (room == null) {
-            return Response.status(Response.Status.NOT_FOUND)
-                           .entity("Room not found")
-                           .build();
+            throw new LinkedResourceNotFoundException("Room with ID " + roomId + " not found.");
         }
         
-        // CRITICAL COURSEWORK RULE: Cannot delete if sensors are attached
         if (!room.getSensorIds().isEmpty()) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                           .entity("Cannot delete room: Sensors are still attached.")
-                           .build();
+            // NEW: Use RoomNotEmptyException (409) instead of BAD_REQUEST
+            // The spec specifically mentions "Conflict" for this rule in many JAX-RS labs
+            throw new RoomNotEmptyException("Cannot delete room " + roomId + " because it has attached sensors.");
         }
         
-        // If it exists and has no sensors, delete it
         rooms.remove(roomId);
-        return Response.status(Response.Status.NO_CONTENT).build(); // 204 No Content is standard for successful deletion
+        return Response.noContent().build(); 
     }
 }
 

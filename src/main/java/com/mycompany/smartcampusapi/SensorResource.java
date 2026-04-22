@@ -4,11 +4,6 @@
  */
 package com.mycompany.smartcampusapi;
 
-/**
- *
- * @author Admin
- */
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +19,7 @@ public class SensorResource {
     private Map<String, Sensor> sensors = DatabaseClass.getSensors();
     private Map<String, Room> rooms = DatabaseClass.getRooms();
 
-    // 1. GET ALL SENSORS (Includes optional QueryParam to filter by type)
+    // 1. GET ALL SENSORS (with optional ?type= filter)
     @GET
     public List<Sensor> getAllSensors(@QueryParam("type") String type) {
         if (type != null && !type.isEmpty()) {
@@ -45,9 +40,7 @@ public class SensorResource {
     public Response getSensor(@PathParam("sensorId") String sensorId) {
         Sensor sensor = sensors.get(sensorId);
         if (sensor == null) {
-            return Response.status(Response.Status.NOT_FOUND)
-                           .entity("Sensor not found")
-                           .build();
+            throw new ResourceNotFoundException("Sensor with ID '" + sensorId + "' not found.");
         }
         return Response.ok(sensor).build();
     }
@@ -55,28 +48,24 @@ public class SensorResource {
     // 3. CREATE A NEW SENSOR
     @POST
     public Response addSensor(Sensor sensor) {
-        // Prevent overwriting
         if (sensors.containsKey(sensor.getId())) {
             return Response.status(Response.Status.CONFLICT)
-                           .entity("Sensor ID already exists")
+                           .entity(new ErrorMessage("Sensor ID already exists.", 409))
+                           .type(MediaType.APPLICATION_JSON)
                            .build();
         }
-
-        // Validate that the Room ID provided actually exists
         Room room = rooms.get(sensor.getRoomId());
         if (room == null) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                           .entity("Invalid Room ID. The room must exist before adding a sensor.")
-                           .build();
+            throw new LinkedResourceNotFoundException(
+                "Room with ID '" + sensor.getRoomId() + "' does not exist."
+            );
         }
-
-        // Save the sensor
         sensors.put(sensor.getId(), sensor);
-        
-        // Link the sensor to the room's list
         room.getSensorIds().add(sensor.getId());
-
-        return Response.status(Response.Status.CREATED).entity(sensor).build();
+        return Response.status(Response.Status.CREATED)
+                       .entity(sensor)
+                       .type(MediaType.APPLICATION_JSON)
+                       .build();
     }
 
     // 4. DELETE A SENSOR
@@ -84,28 +73,20 @@ public class SensorResource {
     @Path("/{sensorId}")
     public Response deleteSensor(@PathParam("sensorId") String sensorId) {
         Sensor sensor = sensors.get(sensorId);
-        
         if (sensor == null) {
-            return Response.status(Response.Status.NOT_FOUND)
-                           .entity("Sensor not found")
-                           .build();
+            throw new ResourceNotFoundException("Sensor with ID '" + sensorId + "' not found.");
         }
-
-        // Find the room this sensor belongs to and remove the link
         Room room = rooms.get(sensor.getRoomId());
         if (room != null) {
             room.getSensorIds().remove(sensorId);
         }
-
-        // Finally, delete the sensor itself
         sensors.remove(sensorId);
-        return Response.status(Response.Status.NO_CONTENT).build();
+        return Response.noContent().build();
     }
-    
+
     // 5. SUB-RESOURCE LOCATOR for Readings
     @Path("/{sensorId}/readings")
     public SensorReadingResource getReadingsResource(@PathParam("sensorId") String sensorId) {
-        // We pass the sensorId to the new class so it knows which sensor to work with
         return new SensorReadingResource(sensorId);
     }
 }
