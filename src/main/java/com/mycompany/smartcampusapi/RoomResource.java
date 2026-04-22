@@ -34,7 +34,7 @@ public class RoomResource {
         Room room = rooms.get(roomId);
         if (room == null) {
             // Uses ResourceNotFoundMapper (404)
-            throw new LinkedResourceNotFoundException("Room with ID " + roomId + " not found.");
+            throw new ResourceNotFoundException("Room with ID " + roomId + " not found.");
         }
         return Response.ok(room).build();
     }
@@ -55,7 +55,7 @@ public class RoomResource {
         Room room = rooms.get(roomId);
         
         if (room == null) {
-            throw new LinkedResourceNotFoundException("Room with ID " + roomId + " not found.");
+            throw new ResourceNotFoundException("Room with ID " + roomId + " not found.");
         }
         
         if (!room.getSensorIds().isEmpty()) {
