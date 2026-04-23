@@ -4,9 +4,7 @@
  */
 package com.mycompany.smartcampusapi;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -16,77 +14,80 @@ import javax.ws.rs.core.Response;
 @Consumes(MediaType.APPLICATION_JSON)
 public class SensorResource {
 
-    private Map<String, Sensor> sensors = DatabaseClass.getSensors();
-    private Map<String, Room> rooms = DatabaseClass.getRooms();
+    private SensorDAO sensorDAO = new SensorDAO();
+    private RoomDAO roomDAO = new RoomDAO();
 
-    // 1. GET ALL SENSORS (with optional ?type= filter)
+    // GET /api/v1/sensors - Get all sensors (optional ?type= filter)
     @GET
     public List<Sensor> getAllSensors(@QueryParam("type") String type) {
         if (type != null && !type.isEmpty()) {
-            List<Sensor> filteredSensors = new ArrayList<>();
-            for (Sensor s : sensors.values()) {
-                if (s.getType().equalsIgnoreCase(type)) {
-                    filteredSensors.add(s);
-                }
-            }
-            return filteredSensors;
+            return sensorDAO.getSensorsByType(type);
         }
-        return new ArrayList<>(sensors.values());
+        return sensorDAO.getAllSensors();
     }
 
-    // 2. GET A SPECIFIC SENSOR BY ID
+    // GET /api/v1/sensors/{sensorId} - Get one sensor
     @GET
     @Path("/{sensorId}")
     public Response getSensor(@PathParam("sensorId") String sensorId) {
-        Sensor sensor = sensors.get(sensorId);
+        Sensor sensor = sensorDAO.getSensorById(sensorId);
         if (sensor == null) {
-            throw new ResourceNotFoundException("Sensor with ID '" + sensorId + "' not found.");
+            throw new ResourceNotFoundException(
+                "Sensor with ID '" + sensorId + "' not found."
+            );
         }
-        return Response.ok(sensor).build();
+        return Response.ok(sensor)
+                       .type(MediaType.APPLICATION_JSON)
+                       .build();
     }
 
-    // 3. CREATE A NEW SENSOR
+    // POST /api/v1/sensors - Register a new sensor
     @POST
     public Response addSensor(Sensor sensor) {
-        if (sensors.containsKey(sensor.getId())) {
+        if (sensorDAO.sensorExists(sensor.getId())) {
             return Response.status(Response.Status.CONFLICT)
                            .entity(new ErrorMessage("Sensor ID already exists.", 409))
                            .type(MediaType.APPLICATION_JSON)
                            .build();
         }
-        Room room = rooms.get(sensor.getRoomId());
-        if (room == null) {
+        if (!roomDAO.roomExists(sensor.getRoomId())) {
             throw new LinkedResourceNotFoundException(
                 "Room with ID '" + sensor.getRoomId() + "' does not exist."
             );
         }
-        sensors.put(sensor.getId(), sensor);
-        room.getSensorIds().add(sensor.getId());
+        sensorDAO.addSensor(sensor);
+        // Link sensor ID to the room's sensorIds list
+        roomDAO.getRoomById(sensor.getRoomId())
+               .getSensorIds().add(sensor.getId());
         return Response.status(Response.Status.CREATED)
                        .entity(sensor)
                        .type(MediaType.APPLICATION_JSON)
                        .build();
     }
 
-    // 4. DELETE A SENSOR
+    // DELETE /api/v1/sensors/{sensorId} - Remove a sensor
     @DELETE
     @Path("/{sensorId}")
     public Response deleteSensor(@PathParam("sensorId") String sensorId) {
-        Sensor sensor = sensors.get(sensorId);
+        Sensor sensor = sensorDAO.getSensorById(sensorId);
         if (sensor == null) {
-            throw new ResourceNotFoundException("Sensor with ID '" + sensorId + "' not found.");
+            throw new ResourceNotFoundException(
+                "Sensor with ID '" + sensorId + "' not found."
+            );
         }
-        Room room = rooms.get(sensor.getRoomId());
+        // Unlink sensor from its room
+        Room room = roomDAO.getRoomById(sensor.getRoomId());
         if (room != null) {
             room.getSensorIds().remove(sensorId);
         }
-        sensors.remove(sensorId);
+        sensorDAO.deleteSensor(sensorId);
         return Response.noContent().build();
     }
 
-    // 5. SUB-RESOURCE LOCATOR for Readings
+    // SUB-RESOURCE LOCATOR - Delegates to SensorReadingResource
     @Path("/{sensorId}/readings")
-    public SensorReadingResource getReadingsResource(@PathParam("sensorId") String sensorId) {
+    public SensorReadingResource getReadingsResource(
+            @PathParam("sensorId") String sensorId) {
         return new SensorReadingResource(sensorId);
     }
 }

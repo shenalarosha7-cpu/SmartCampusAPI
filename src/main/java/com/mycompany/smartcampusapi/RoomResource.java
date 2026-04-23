@@ -4,14 +4,7 @@
  */
 package com.mycompany.smartcampusapi;
 
-/**
- *
- * @author Admin
- */
-
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -20,52 +13,67 @@ import javax.ws.rs.core.Response;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class RoomResource {
-    
-    private Map<String, Room> rooms = DatabaseClass.getRooms();
 
+    private RoomDAO roomDAO = new RoomDAO();
+
+    // GET /api/v1/rooms - Get all rooms
     @GET
     public List<Room> getAllRooms() {
-        return new ArrayList<>(rooms.values());
+        return roomDAO.getAllRooms();
     }
 
+    // GET /api/v1/rooms/{roomId} - Get one room
     @GET
     @Path("/{roomId}")
     public Response getRoom(@PathParam("roomId") String roomId) {
-        Room room = rooms.get(roomId);
+        Room room = roomDAO.getRoomById(roomId);
         if (room == null) {
-            // Uses ResourceNotFoundMapper (404)
-            throw new ResourceNotFoundException("Room with ID " + roomId + " not found.");
+            throw new ResourceNotFoundException(
+                "Room with ID '" + roomId + "' not found."
+            );
         }
-        return Response.ok(room).build();
+        return Response.ok(room)
+                       .type(MediaType.APPLICATION_JSON)
+                       .build();
     }
 
+    // POST /api/v1/rooms - Create a new room
     @POST
     public Response addRoom(Room room) {
-        if (rooms.containsKey(room.getId())) {
-            // NEW: Use the RoomNotEmptyException for "Conflict" (409)
-            throw new RoomNotEmptyException("Room ID " + room.getId() + " already exists.");
+        if (roomDAO.roomExists(room.getId())) {
+            return Response.status(Response.Status.CONFLICT)
+                           .entity(new ErrorMessage("Room ID already exists.", 409))
+                           .type(MediaType.APPLICATION_JSON)
+                           .build();
         }
-        rooms.put(room.getId(), room);
-        return Response.status(Response.Status.CREATED).entity(room).build();
+        roomDAO.addRoom(room);
+        return Response.status(Response.Status.CREATED)
+                       .entity(room)
+                       .type(MediaType.APPLICATION_JSON)
+                       .build();
     }
-    
+
+    // DELETE /api/v1/rooms/{roomId} - Delete a room
     @DELETE
     @Path("/{roomId}")
     public Response deleteRoom(@PathParam("roomId") String roomId) {
-        Room room = rooms.get(roomId);
-        
+        Room room = roomDAO.getRoomById(roomId);
         if (room == null) {
-            throw new ResourceNotFoundException("Room with ID " + roomId + " not found.");
+            throw new ResourceNotFoundException(
+                "Room with ID '" + roomId + "' not found."
+            );
         }
-        
-        if (!room.getSensorIds().isEmpty()) {
-            // NEW: Use RoomNotEmptyException (409) instead of BAD_REQUEST
-            // The spec specifically mentions "Conflict" for this rule in many JAX-RS labs
-            throw new RoomNotEmptyException("Cannot delete room " + roomId + " because it has attached sensors.");
+        if (roomDAO.roomHasSensors(roomId)) {
+            throw new RoomNotEmptyException(
+                "Room " + roomId + " cannot be deleted because "
+                + "it still has sensors assigned to it."
+            );
         }
-        
-        rooms.remove(roomId);
-        return Response.noContent().build(); 
+        roomDAO.deleteRoom(roomId);
+        return Response.ok()
+                       .entity(new ErrorMessage("Room deleted successfully.", 200))
+                       .type(MediaType.APPLICATION_JSON)
+                       .build();
     }
 }
 
