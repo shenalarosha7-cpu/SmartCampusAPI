@@ -42,7 +42,8 @@ public class RoomResource {
     public Response addRoom(Room room) {
         if (roomDAO.roomExists(room.getId())) {
             return Response.status(Response.Status.CONFLICT)
-                           .entity(new ErrorMessage("Room ID already exists.", 409))
+                           .entity(new ErrorMessage("Room ID already exists.", 409,
+                            "http://localhost:8080/SmartCampusAPI/api/v1"))
                            .type(MediaType.APPLICATION_JSON)
                            .build();
         }
@@ -71,7 +72,8 @@ public class RoomResource {
         }
         roomDAO.deleteRoom(roomId);
         return Response.ok()
-                       .entity(new ErrorMessage("Room deleted successfully.", 200))
+                       .entity(new ErrorMessage("Room deleted successfully.", 200,
+                        "http://localhost:8080/SmartCampusAPI/api/v1"))
                        .type(MediaType.APPLICATION_JSON)
                        .build();
     }

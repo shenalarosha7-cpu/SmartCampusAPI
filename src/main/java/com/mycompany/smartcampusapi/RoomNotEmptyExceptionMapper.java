@@ -4,23 +4,25 @@
  */
 package com.mycompany.smartcampusapi;
 
-/**
- *
- * @author Admin
- */
-
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
 @Provider
-public class RoomNotEmptyExceptionMapper implements ExceptionMapper<RoomNotEmptyException> {
+public class RoomNotEmptyExceptionMapper
+        implements ExceptionMapper<RoomNotEmptyException> {
+
     @Override
-    public Response toResponse(RoomNotEmptyException e) {
-        return Response.status(409)
-            .entity(new ErrorMessage(e.getMessage(), 409))
-            .type(MediaType.APPLICATION_JSON)
-            .build();
+    public Response toResponse(RoomNotEmptyException ex) {
+        ErrorMessage errorMessage = new ErrorMessage(
+            ex.getMessage(),
+            409,
+            "http://localhost:8080/SmartCampusAPI/api/v1"
+        );
+        return Response.status(Response.Status.CONFLICT)
+                       .entity(errorMessage)
+                       .type(MediaType.APPLICATION_JSON)
+                       .build();
     }
 }

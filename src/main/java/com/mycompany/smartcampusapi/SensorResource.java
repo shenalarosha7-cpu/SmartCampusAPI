@@ -46,7 +46,8 @@ public class SensorResource {
     public Response addSensor(Sensor sensor) {
         if (sensorDAO.sensorExists(sensor.getId())) {
             return Response.status(Response.Status.CONFLICT)
-                           .entity(new ErrorMessage("Sensor ID already exists.", 409))
+                           .entity(new ErrorMessage("Sensor ID already exists.", 409,
+                            "http://localhost:8080/SmartCampusAPI/api/v1"))
                            .type(MediaType.APPLICATION_JSON)
                            .build();
         }

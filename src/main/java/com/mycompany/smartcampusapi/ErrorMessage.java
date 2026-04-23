@@ -4,29 +4,41 @@
  */
 package com.mycompany.smartcampusapi;
 
-/**
- *
- * @author Admin
- */
-
-import javax.xml.bind.annotation.XmlRootElement;
-
-@XmlRootElement
 public class ErrorMessage {
-    private String error;
-    private int status;
+
+    private String errorMessage;
+    private int errorCode;
+    private String documentation;
 
     public ErrorMessage() {}
 
-    public ErrorMessage(String error, int status) {
-        this.error = error;
-        this.status = status;
+    public ErrorMessage(String errorMessage, int errorCode, String documentation) {
+        this.errorMessage = errorMessage;
+        this.errorCode = errorCode;
+        this.documentation = documentation;
     }
 
-    // Getters and Setters
-    public String getError() { return error; }
-    public void setError(String error) { this.error = error; }
+    public String getErrorMessage() {
+        return errorMessage;
+    }
 
-    public int getStatus() { return status; }
-    public void setStatus(int status) { this.status = status; }
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
+    }
+
+    public int getErrorCode() {
+        return errorCode;
+    }
+
+    public void setErrorCode(int errorCode) {
+        this.errorCode = errorCode;
+    }
+
+    public String getDocumentation() {
+        return documentation;
+    }
+
+    public void setDocumentation(String documentation) {
+        this.documentation = documentation;
+    }
 }
