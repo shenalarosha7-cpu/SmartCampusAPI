@@ -114,30 +114,39 @@ smartcampusapi/
     └── main/
         └── java/
             └── com/mycompany/smartcampusapi/
-                ├── SmartCampusApplication.java      # @ApplicationPath("/api/v1")
-                ├── DatabaseClass.java               # In-memory ConcurrentHashMap store
-                ├── AppStartupListener.java          # Prints startup message to Tomcat log
-                ├── Room.java                        # POJO
-                ├── Sensor.java                      # POJO
-                ├── SensorReading.java               # POJO
-                ├── ErrorMessage.java                # Generic error response wrapper
-                ├── DiscoveryResource.java           # GET /api/v1
-                ├── RoomResource.java                # /api/v1/rooms
-                ├── SensorResource.java              # /api/v1/sensors
-                ├── SensorReadingResource.java       # /api/v1/sensors/{id}/readings
-                ├── RoomDAO.java                     # Data access for rooms
-                ├── SensorDAO.java                   # Data access for sensors
-                ├── SensorReadingDAO.java            # Data access for sensor readings
-                ├── RoomNotEmptyException.java       # Thrown on DELETE room with sensors
-                ├── RoomNotEmptyExceptionMapper.java # → HTTP 409
-                ├── LinkedResourceNotFoundException.java  # Thrown when roomId missing
-                ├── LinkedResourceNotFoundMapper.java     # → HTTP 422
-                ├── SensorUnavailableException.java  # Thrown when sensor is MAINTENANCE
-                ├── SensorUnavailableMapper.java     # → HTTP 403
-                ├── ResourceNotFoundException.java   # Thrown when resource ID not found
-                ├── ResourceNotFoundMapper.java      # → HTTP 404
-                ├── GlobalExceptionMapper.java       # Catches Throwable → HTTP 500
-                └── LoggingFilter.java               # ContainerRequest + ContainerResponseFilter
+                │
+                ├── model/                          # Data Objects (POJOs)
+                │   ├── Room.java
+                │   ├── Sensor.java
+                │   └── SensorReading.java
+                │
+                ├── dao/                            # Data Access Layer
+                │   ├── DatabaseClass.java
+                │   ├── RoomDAO.java
+                │   ├── SensorDAO.java
+                │   └── SensorReadingDAO.java
+                │
+                ├── resource/                       # API Endpoints (JAX-RS)
+                │   ├── DiscoveryResource.java
+                │   ├── RoomResource.java
+                │   ├── SensorResource.java
+                │   └── SensorReadingResource.java
+                │
+                ├── exception/                      # Error Handling
+                │   ├── RoomNotEmptyException.java
+                │   ├── RoomNotEmptyExceptionMapper.java
+                │   ├── LinkedResourceNotFoundException.java
+                │   ├── LinkedResourceNotFoundMapper.java
+                │   ├── SensorUnavailableException.java
+                │   ├── SensorUnavailableMapper.java
+                │   ├── ResourceNotFoundException.java
+                │   ├── ResourceNotFoundMapper.java
+                │   └── GlobalExceptionMapper.java
+                │
+                ├── SmartCampusApplication.java     # Config & Bootstrap
+                ├── AppStartupListener.java        
+                ├── ErrorMessage.java               
+                └── LoggingFilter.java
 ```
 
 ---
