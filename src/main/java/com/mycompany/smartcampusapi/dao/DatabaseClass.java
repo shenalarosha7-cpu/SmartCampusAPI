@@ -2,13 +2,16 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package com.mycompany.smartcampusapi;
+package com.mycompany.smartcampusapi.dao;
 
 /**
  *
  * @author Admin
  */
 
+import com.mycompany.smartcampusapi.model.SensorReading;
+import com.mycompany.smartcampusapi.model.Sensor;
+import com.mycompany.smartcampusapi.model.Room;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;

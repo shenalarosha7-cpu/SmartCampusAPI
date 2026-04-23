@@ -2,8 +2,14 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package com.mycompany.smartcampusapi;
+package com.mycompany.smartcampusapi.resource;
 
+import com.mycompany.smartcampusapi.exception.ResourceNotFoundException;
+import com.mycompany.smartcampusapi.exception.SensorUnavailableException;
+import com.mycompany.smartcampusapi.dao.SensorReadingDAO;
+import com.mycompany.smartcampusapi.dao.SensorDAO;
+import com.mycompany.smartcampusapi.model.SensorReading;
+import com.mycompany.smartcampusapi.model.Sensor;
 import java.util.List;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;

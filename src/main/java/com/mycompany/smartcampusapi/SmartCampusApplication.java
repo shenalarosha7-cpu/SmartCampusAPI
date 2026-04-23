@@ -8,6 +8,14 @@ package com.mycompany.smartcampusapi;
  *
  * @author Admin
  */
+import com.mycompany.smartcampusapi.exception.SensorUnavailableMapper;
+import com.mycompany.smartcampusapi.exception.GlobalExceptionMapper;
+import com.mycompany.smartcampusapi.exception.ResourceNotFoundMapper;
+import com.mycompany.smartcampusapi.exception.LinkedResourceNotFoundMapper;
+import com.mycompany.smartcampusapi.exception.RoomNotEmptyExceptionMapper;
+import com.mycompany.smartcampusapi.resource.SensorResource;
+import com.mycompany.smartcampusapi.resource.DiscoveryResource;
+import com.mycompany.smartcampusapi.resource.RoomResource;
 import java.util.HashSet;
 import java.util.Set;
 import javax.ws.rs.ApplicationPath;
