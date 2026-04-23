@@ -85,8 +85,9 @@ This RESTful API forms the backend infrastructure for a university Smart Campus 
 All errors return a consistent JSON body:
 ```json
 {
-  "status": 409,
-  "error": "Room LIB-301 cannot be deleted because it still has sensors assigned."
+  "errorMessage": "Room LIB-301 cannot be deleted because it still has sensors assigned.",
+  "errorCode": 409,
+  "documentation": "http://localhost:8080/SmartCampusAPI/api/v1"
 }
 ```
 
@@ -377,8 +378,9 @@ curl -s -X DELETE http://localhost:8080/SmartCampusAPI/api/v1/rooms/LIB-301 \
 **Expected response (409 Conflict):**
 ```json
 {
-  "status": 409,
-  "error": "Room LIB-301 cannot be deleted because it still has sensors assigned to it."
+  "errorMessage": "Room LIB-301 cannot be deleted because it still has sensors assigned to it.",
+  "errorCode": 409,
+  "documentation": "http://localhost:8080/SmartCampusAPI/api/v1"
 }
 ```
 
@@ -397,8 +399,9 @@ curl -s -X POST http://localhost:8080/SmartCampusAPI/api/v1/sensors \
 **Expected response (422 Unprocessable Entity):**
 ```json
 {
-  "status": 422,
-  "error": "Room with ID 'GHOST-999' does not exist."
+  "errorMessage": "Room with ID 'GHOST-999' does not exist.",
+  "errorCode": 422,
+  "documentation": "http://localhost:8080/SmartCampusAPI/api/v1"
 }
 ```
 
@@ -423,8 +426,9 @@ curl -s -X POST http://localhost:8080/SmartCampusAPI/api/v1/sensors/OCC-001/read
 **Expected response (403 Forbidden):**
 ```json
 {
-  "status": 403,
-  "error": "Sensor OCC-001 is currently under MAINTENANCE and cannot accept new readings."
+  "errorMessage": "Sensor OCC-001 is currently under MAINTENANCE and cannot accept new readings.",
+  "errorCode": 403,
+  "documentation": "http://localhost:8080/SmartCampusAPI/api/v1"
 }
 ```
 
@@ -570,7 +574,7 @@ Exposing raw Java stack traces in API responses is a serious information disclos
 
 **Business logic revelation:** Stack traces through business logic code reveal internal processing steps, branching conditions, and data flow, which can be exploited to bypass security controls or manipulate application behaviour.
 
-The global `ExceptionMapper<Throwable>` in this project addresses this risk entirely by intercepting all unexpected exceptions before they reach the response serialiser and replacing the raw trace with a generic `{"status": 500, "error": "An internal server error occurred."}` message. The actual exception details are logged server-side where only authorised personnel can access them, satisfying both the security requirement and the operational need for error observability.
+The global `ExceptionMapper<Throwable>` in this project addresses this risk entirely by intercepting all unexpected exceptions before they reach the response serialiser and replacing the raw trace with a generic `{"errorMessage": "Unexpected Error Occurred", "errorCode": 500, "documentation": "http://localhost:8080/SmartCampusAPI/api/v1"}` message. The actual exception details are logged server-side where only authorised personnel can access them, satisfying both the security requirement and the operational need for error observability.
 
 ---
 
