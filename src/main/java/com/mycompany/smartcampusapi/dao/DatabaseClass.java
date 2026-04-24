@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 public class DatabaseClass {
-    // We use LinkedHashMap to preserve the order in which items are added
+    // LinkedHashMap to preserve the order in which items are added
     private static Map<String, Room> rooms = new LinkedHashMap<>();
     private static Map<String, Sensor> sensors = new LinkedHashMap<>();
     private static Map<String, List<SensorReading>> sensorReadings = new LinkedHashMap<>();
@@ -39,11 +39,11 @@ public class DatabaseClass {
         sensors.put(s1.getId(), s1);
         sensors.put(s2.getId(), s2);
 
-        // 3. Link Sensors to Rooms (Crucial for Part 2 & 3 logic)
+        // 3. Link Sensors to Rooms
         lib.getSensorIds().add(s1.getId());
         cs.getSensorIds().add(s2.getId());
 
-        // 4. Initialize Sensor Reading History (Part 4 requirement)
+        // 4. Initialize Sensor Reading History
         List<SensorReading> sens01Readings = new ArrayList<>();
         // Add one initial reading to SENS-01 for testing GET requests
         sens01Readings.add(new SensorReading("READ-001", System.currentTimeMillis(), 400.5));

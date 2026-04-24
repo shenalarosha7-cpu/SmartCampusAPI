@@ -16,7 +16,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-// We use an empty path here because the Application class already handles "/api/v1"
+// Use an empty path here because the Application class already handles "/api/v1"
 @Path("/")
 public class DiscoveryResource {
 

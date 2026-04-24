@@ -49,7 +49,7 @@ public class SensorReadingResource {
                 "Sensor with ID '" + sensorId + "' not found."
             );
         }
-        // Part 5 - Block if sensor is under MAINTENANCE
+        // Block if sensor is under MAINTENANCE
         if ("MAINTENANCE".equals(sensor.getStatus())) {
             throw new SensorUnavailableException(
                 "Sensor " + sensorId + " is currently under MAINTENANCE "
@@ -58,7 +58,7 @@ public class SensorReadingResource {
         }
         // Save reading
         readingDAO.addReading(sensorId, reading);
-        // Update parent sensor currentValue (Part 4 side effect)
+        // Update parent sensor currentValue
         sensor.setCurrentValue(reading.getValue());
         return Response.status(Response.Status.CREATED)
                        .entity(reading)
